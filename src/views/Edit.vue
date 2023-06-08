@@ -1,0 +1,80 @@
+<template>
+    <div>
+        <nav class="navbar is-info" role="navigation" aria-label="main navigation">
+            <div class="navbar-brand">
+                <h3 class="title is-3">Edição de Usuários</h3>
+            </div>
+        </nav>
+        <br>
+        <div class="columns is-centered">
+            <div class="column is-half">
+                <div v-if="error != undefined">
+                    <div class="notification is-danger">
+                        <p>{{ error }}</p>
+                    </div>
+                </div>
+                <p>Nome</p>
+                <input type="text" placeholder="nome do usuário" class="input" v-model="name">
+                <p>Email</p>
+                <input type="email" placeholder="Email" class="input" v-model="email">
+                <hr>
+                <button class="button is-success" @click="update">Editar</button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+import axios from 'axios';
+export default{
+    created(){
+        var req = {
+         headers:{
+                Authorization: "Bearer " + localStorage.getItem('token')
+            }
+        }
+        axios.get("http://localhost:8686/user/" + this.$route.params.id, req).then(res =>{
+            console.log(res);
+            this.name = res.data.name;
+            this.email = res.data.email;
+            this.id = res.data.id;
+        }).catch(err =>{
+            console.log(err.response)
+            this.$router.push({name: 'users'})
+        })
+    },
+    data(){
+        return{
+            name: '',
+            email: '',
+            id: -1,
+            error: undefined,
+        }
+    },
+    methods:{
+        update(){
+            var req = {
+            headers:{
+                    Authorization: "Bearer " + localStorage.getItem('token')
+                }
+            }
+            axios.put("http://localhost:8686/user",{
+                name: this.name,
+                email: this.email,
+                id: this.id
+            }, req).then(res =>{
+                console.log(res);
+                this.$router.push({name: 'users'});
+            }).catch(err =>{
+                var msgErro = err.response.data.err
+                console.log(msgErro);
+                this.error = msgErro
+            })
+        }
+    }
+}
+</script>
+
+<style scoped>
+
+</style>
